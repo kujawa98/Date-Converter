@@ -64,21 +64,23 @@ def take_input():
 
 
 def process(dates, reg, order):
+    f = open('new_dates.txt', 'w')
     for date in dates:
         try:
             wn = reg.search(date)
             day = int(wn.group(order[0]))
             month = int(wn.group(order[1]))
             year = int(wn.group(order[2]))
-            print_dates(day, month, year)
+            f.write(print_dates(day, month, year))
         except AttributeError:
             pass
+    f.close()
 
 
 def print_dates(day, month, year):
     if valid_date(day, month, year):
         proper_format = '-'.join(map(lambda x: str(x), [day, month, year]))
-        print(proper_format)
+        return f'{proper_format}\n'
 
 
 def main():
