@@ -1,5 +1,5 @@
-# Date Detection
-
+# Date Converter
+Simple date converter app based on "Automate the Boring Stuff with Python" by Al Sweigart. Just nothing special.
 
 ## Technologies
 Script created with:
