@@ -1,4 +1,5 @@
 import re
+import sys
 
 
 def is_leap(year):
@@ -84,9 +85,13 @@ def print_dates(day, month, year):
 
 
 def main():
+    try:
+        f = open(sys.argv[1], 'r')
+        dates = f.readlines()
+    except FileNotFoundError:
+        print(f"There's no such file as {sys.argv[1]}")
+        sys.exit()
     frmt = take_input()
-    f = open('dates.txt', 'r')
-    dates = f.readlines()
     dates = map(lambda x: x.rstrip(), dates)
     if frmt == 'mdy':
         reg = create_mdy_regex()
