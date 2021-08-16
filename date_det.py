@@ -11,53 +11,92 @@ def is_leap(year):
     return False
 
 
-date_dmy_regex = re.compile(r'''
-                        (0?[1-9]|[1-2][0-9]|3[0-1]) #day
-                        ([/.-])
-                        (0?[1-9]|1[0-2]) #month
-                        ([/.-])
-                        ([1-2]\d{3}) #year
-                        ''', re.VERBOSE)
+def create_dmy_regex():
+    date_dmy_regex = re.compile(r'''
+                            (0[1-9]|[1-2][0-9]|3[0-1]) #day
+                            ([/.-])
+                            (0[1-9]|1[0-2]) #month
+                            ([/.-])
+                            ([1-2]\d{3}) #year
+                            ''', re.VERBOSE)
+    return date_dmy_regex
 
-date_mdy_regex = re.compile(r'''
-                        (0?[1-9]|1[0-2]) #month
-                        ([/.-])
-                        (0?[1-9]|[1-2][0-9]|3[0-1]) #day
-                        ([/.-])
-                        ([1-2]\d{3}) #year
-                        ''', re.VERBOSE)
 
-date_ydm_regex = re.compile(r'''
-                        ([1-2]\d{3}) #year
-                        ([/.-])
-                        (0?[1-9]|[1-2][0-9]|3[0-1]) #day
-                        ([/.-])
-                        (0?[1-9]|1[0-2]) #month
-                        ''', re.VERBOSE)
+def create_mdy_regex():
+    date_mdy_regex = re.compile(r'''
+                            (0[1-9]|1[0-2]) #month
+                            ([/.-])
+                            (0[1-9]|[1-2][0-9]|3[0-1]) #day
+                            ([/.-])
+                            ([1-2]\d{3}) #year
+                            ''', re.VERBOSE)
+    return date_mdy_regex
 
-while True:
-    frmt = input('Choose which format you are interested in (dmy/mdy): ').lower()
-    if frmt != 'dmy' and frmt != 'mdy':
-        print('Enter correct format!')
+
+def create_ymd_regex():
+    date_ydm_regex = re.compile(r'''
+                            ([1-2]\d{3}) #year
+                            ([/.-])
+                            (0?[1-9]|1[0-2]) #month
+                            ([/.-])
+                            (0?[1-9]|[1-2][0-9]|3[0-1]) #day
+                            ''', re.VERBOSE)
+    return date_ydm_regex
+
+
+def valid_date(day, month, year):
+    if month in [4, 6, 9, 11] and day > 30:
+        return False
+    elif month not in [2, 4, 6, 9, 11] and day > 31:
+        return False
+    elif month == 2 and 28 < day <= 29 and not is_leap(year):
+        return False
+    return True
+
+
+def take_input():
+    while True:
+        frmt = input('Choose which format you are interested in (dmy/mdy/ymd): ').lower()
+        if frmt != 'dmy' and frmt != 'mdy' and frmt != 'ymd':
+            print('Enter correct format!')
+        else:
+            return frmt
+
+
+def process(dates, reg, order):
+    for date in dates:
+        try:
+            wn = reg.search(date)
+            day = int(wn.group(order[0]))
+            month = int(wn.group(order[1]))
+            year = int(wn.group(order[2]))
+            print_dates(day, month, year)
+        except AttributeError:
+            pass
+
+
+def print_dates(day, month, year):
+    if valid_date(day, month, year):
+        proper_format = '-'.join(map(lambda x: str(x), [day, month, year]))
+        print(proper_format)
+
+
+def main():
+    frmt = take_input()
+    f = open('dates.txt', 'r')
+    dates = f.readlines()
+    dates = map(lambda x: x.rstrip(), dates)
+    if frmt == 'mdy':
+        reg = create_mdy_regex()
+        process(dates, reg, (3, 1, 5))
+    elif frmt == 'ymd':
+        reg = create_ymd_regex()
+        process(dates, reg, (5, 3, 1))
     else:
-        break
-month, day, year = 0, 0, 0
-if frmt == 'mdy':
-    rg = date_mdy_regex.search('04.20.1998')
-    month = int(rg.group(1))
-    day = int(rg.group(3))
-else:
-    rg = date_dmy_regex.search('20.04.1998')
-    day = int(rg.group(1))
-    month = int(rg.group(3))
-year = int(rg.group(5))
+        reg = create_dmy_regex()
+        process(dates, reg, (1, 3, 5))
+    f.close()
 
-if month in [4, 6, 9, 11] and day > 30:
-    print('invalid')
-elif month == 2 and day > 29:
-    print('invalid')
-elif month == 2 and day > 28 and not is_leap(year):
-    print('invalid')
-else:
-    proper_format = '-'.join(map(lambda x: str(x), [day, month, year]))
-    print(proper_format)
+
+if __name__ == '__main__':
+    main()
